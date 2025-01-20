@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Educator Interview Assistant</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+    textarea {
+      width: 100%;
+      margin: 10px 0;
+    }
+    .result {
+      background-color: #f9f9f9;
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Educator Interview Assistant</h1>
+    <form id="educator-form">
+      <label>How much time do you have for this activity?</label>
+      <input type="text" id="time" required>
+
+      <label>What grade(s) or age group(s) are your learners?</label>
+      <input type="text" id="grade" required>
+
+      <label>What is the learning environment (e.g., classroom, library, after-school)?</label>
+      <input type="text" id="environment" required>
+
+      <label>How confident are you in using hands-on projects?</label>
+      <input type="text" id="confidence" required>
+
+      <label>Do you want to include an assessment? (Yes/No)</label>
+      <input type="text" id="assessment" required>
+
+      <button type="submit">Generate Plan</button>
+    </form>
+
+    <div id="output" class="result" style="display: none;">
+      <h2>Results</h2>
+      <h3>Educator Responses</h3>
+      <pre id="responses"></pre>
+
+      <h3>Lesson Plan</h3>
+      <pre id="lesson-plan"></pre>
+
+      <h3>Assessment</h3>
+      <pre id="assessment-plan"></pre>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('educator-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // Collect user inputs
+      const time = document.getElementById('time').value;
+      const grade = document.getElementById('grade').value;
+      const environment = document.getElementById('environment').value;
+      const confidence = document.getElementById('confidence').value;
+      const includeAssessment = document.getElementById('assessment').value.toLowerCase() === 'yes';
+
+      // Display user inputs
+      const responses = `
+        Time: ${time}
+        Grade/Age Group: ${grade}
+        Environment: ${environment}
+        Confidence: ${confidence}
+        Include Assessment: ${includeAssessment ? "Yes" : "No"}
+      `;
+      document.getElementById('responses').textContent = responses;
+
+      // AI Integration (simulated with static text here)
+      const lessonPlan = `Lesson Plan for ${grade}:
+      - Activity: Build a flying machine in a ${environment}.
+      - Duration: ${time}.
+      - Confidence Level: ${confidence}.`;
+
+      const assessmentPlan = includeAssessment ? `
+        1. What is the purpose of the flying machine activity?
+        2. Describe the steps to build the flying machine.
+        3. How would you improve the flying machine design?
+      ` : 'No assessment included.';
+
+      document.getElementById('lesson-plan').textContent = lessonPlan;
+      document.getElementById('assessment-plan').textContent = assessmentPlan;
+
+      // Show output
+      document.getElementById('output').style.display = 'block';
+    });
+  </script>
+</body>
+</html>
