@@ -41,6 +41,13 @@
       width: 100%;
       font-size: 16px;
     }
+    #confidence-value {
+      text-align: center;
+      font-weight: bold;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
     button {
       padding: 10px;
       background-color: #0077cc;
@@ -60,49 +67,33 @@
       border-radius: 10px;
       border: 1px solid #b3e0ff;
     }
-    .faq {
-      margin-top: 30px;
-    }
-    .faq h2 {
-      font-size: 18px;
-      cursor: pointer;
-    }
-    .faq-content {
-      display: none;
-      padding: 10px 20px;
-      background: #f9f9f9;
-      border-radius: 5px;
-      border: 1px solid #ddd;
-    }
-    .visible {
-      display: block;
-    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Educator Interview Assistant</h1>
     <form id="educator-form">
-      <label>How much time do you have for this activity?</label>
-      <input type="text" id="time" required>
+      <label>How much time do you have for this activity? <small>(e.g., "30 minutes")</small></label>
+      <input type="text" id="time" placeholder="Enter time in minutes" required>
 
-      <label>What grade(s) or age group(s) are your learners?</label>
-      <input type="text" id="grade" required>
+      <label>What grade(s) or age group(s) are your learners? <small>(e.g., "Grade 6 or Ages 12-15")</small></label>
+      <input type="text" id="grade" placeholder="Enter grade/age group" required>
 
-      <label>What is the learning environment (e.g., classroom, library, after-school)?</label>
-      <input type="text" id="environment" required>
+      <label>What is the learning environment? <small>(e.g., "classroom, library, after-school")</small></label>
+      <input type="text" id="environment" placeholder="Enter learning environment" required>
 
       <label>How confident are you in using hands-on projects?</label>
-      <input type="text" id="confidence" required>
+      <p id="confidence-value">Most Confident</p>
+      <input type="range" id="confidence" min="1" max="5" value="5" step="1" oninput="updateConfidenceValue()">
 
-      <label>Do you want to include an assessment? (Yes/No)</label>
-      <input type="text" id="assessment" required>
+      <label>Do you want to include an assessment? <small>(Yes/No)</small></label>
+      <input type="text" id="assessment" placeholder="Enter 'Yes' or 'No'" required>
 
       <label>Describe your wing design iterations (optional):</label>
-      <textarea id="wing-iterations" rows="3"></textarea>
+      <textarea id="wing-iterations" rows="3" placeholder="Briefly describe wing design improvements"></textarea>
 
       <label>Reflective Questions (optional):</label>
-      <textarea id="reflective" rows="3"></textarea>
+      <textarea id="reflective" rows="3" placeholder="Enter your reflections or questions"></textarea>
 
       <button type="submit">Generate Plan</button>
     </form>
@@ -112,19 +103,18 @@
       <div id="responses"></div>
       <button onclick="generatePDF()">Download PDF</button>
     </div>
-
-    <div class="faq">
-      <h2 onclick="toggleFAQ()">📘 FAQs & Tips</h2>
-      <div class="faq-content">
-        <p><strong>Q: What if the machine doesn’t fly?</strong><br>A: Adjust the rubber band tension and use the tick-tock technique.</p>
-        <p><strong>Q: How can I adapt this for older learners?</strong><br>A: Encourage iterative testing with different wing shapes.</p>
-      </div>
-    </div>
   </div>
 
   <script>
+    function updateConfidenceValue() {
+      const slider = document.getElementById('confidence');
+      const valueDisplay = document.getElementById('confidence-value');
+      const values = ["Very Less Confident", "Less Confident", "Neutral", "Confident", "Most Confident"];
+      valueDisplay.textContent = values[slider.value - 1];
+    }
+
     async function fetchAIResponse(prompt) {
-      const apiKey = "sk-proj-EWjy3wtM8iHb3qZu-UXesy53RXTa3GlqxDCfkUzV4b3envHgVktf4r8UHZ8m7IDFUpiURKeoUMT3BlbkFJaNuUGf4AZo2xUY4g4YwbYFUTLegyP5y0DCI2opyaM8VVyGBzYxcnTgHUVYKz6klgRSVtd1hukAy"; // Replace with your OpenAI API key
+      const apiKey = "your-openai-api-key"; // Replace with your OpenAI API key
       const response = await fetch("https://api.openai.com/v1/completions", {
         method: "POST",
         headers: {
@@ -153,7 +143,7 @@
       const time = document.getElementById('time').value;
       const grade = document.getElementById('grade').value;
       const environment = document.getElementById('environment').value;
-      const confidence = document.getElementById('confidence').value;
+      const confidence = document.getElementById('confidence-value').textContent;
       const assessment = document.getElementById('assessment').value.toLowerCase() === 'yes';
       const iterations = document.getElementById('wing-iterations').value;
       const reflections = document.getElementById('reflective').value;
@@ -182,11 +172,6 @@
       const doc = new jsPDF();
       doc.text(document.getElementById('responses').innerText, 10, 10);
       doc.save('educator_results.pdf');
-    }
-
-    function toggleFAQ() {
-      const faqContent = document.querySelector('.faq-content');
-      faqContent.classList.toggle('visible');
     }
   </script>
 </body>
