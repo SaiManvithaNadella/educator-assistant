@@ -4,24 +4,124 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Educator Interview Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    /* General Styling */
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f8ff;
+      color: #333;
     }
+
     .container {
-      max-width: 600px;
-      margin: auto;
+      max-width: 800px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      padding: 20px 30px;
     }
-    textarea {
-      width: 100%;
-      margin: 10px 0;
+
+    h1 {
+      text-align: center;
+      font-weight: 600;
+      color: #0077cc;
+      margin-bottom: 20px;
     }
-    .result {
-      background-color: #f9f9f9;
-      padding: 10px;
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    label {
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"] {
+      padding: 12px;
       border: 1px solid #ddd;
-      margin-top: 20px;
+      border-radius: 6px;
+      font-size: 16px;
+      background-color: #f9f9f9;
+      transition: 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: #0077cc;
+      box-shadow: 0 0 4px rgba(0, 119, 204, 0.3);
+    }
+
+    button {
+      padding: 12px 20px;
+      background-color: #0077cc;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    .result {
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 10px;
+      background: #e7f5ff;
+      border: 1px solid #b3e0ff;
+    }
+
+    .result h2 {
+      text-align: center;
+      color: #0077cc;
+      margin-bottom: 20px;
+    }
+
+    pre {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      overflow-x: auto;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    footer a {
+      color: #0077cc;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 15px;
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      input[type="text"], button {
+        font-size: 14px;
+      }
     }
   </style>
 </head>
@@ -30,19 +130,19 @@
     <h1>Educator Interview Assistant</h1>
     <form id="educator-form">
       <label>How much time do you have for this activity?</label>
-      <input type="text" id="time" required>
+      <input type="text" id="time" placeholder="Enter time in minutes" required>
 
       <label>What grade(s) or age group(s) are your learners?</label>
-      <input type="text" id="grade" required>
+      <input type="text" id="grade" placeholder="e.g., Grade 6 or Ages 12-15" required>
 
       <label>What is the learning environment (e.g., classroom, library, after-school)?</label>
-      <input type="text" id="environment" required>
+      <input type="text" id="environment" placeholder="e.g., Classroom" required>
 
       <label>How confident are you in using hands-on projects?</label>
-      <input type="text" id="confidence" required>
+      <input type="text" id="confidence" placeholder="e.g., Very Confident" required>
 
       <label>Do you want to include an assessment? (Yes/No)</label>
-      <input type="text" id="assessment" required>
+      <input type="text" id="assessment" placeholder="Enter Yes or No" required>
 
       <button type="submit">Generate Plan</button>
     </form>
@@ -59,6 +159,10 @@
       <pre id="assessment-plan"></pre>
     </div>
   </div>
+
+  <footer>
+    Made with ❤️ for FutureMakers. <a href="#">Learn More</a>
+  </footer>
 
   <script>
     async function fetchAIResponse(prompt) {
@@ -88,14 +192,12 @@
     document.getElementById('educator-form').addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      // Collect user inputs
       const time = document.getElementById('time').value;
       const grade = document.getElementById('grade').value;
       const environment = document.getElementById('environment').value;
       const confidence = document.getElementById('confidence').value;
       const includeAssessment = document.getElementById('assessment').value.toLowerCase() === 'yes';
 
-      // Display user inputs
       const responses = `
         Time: ${time}
         Grade/Age Group: ${grade}
@@ -105,7 +207,6 @@
       `;
       document.getElementById('responses').textContent = responses;
 
-      // AI Prompt for Lesson Plan
       const lessonPlanPrompt = `Create a lesson plan for a ${grade} group in a ${environment} setting. 
       The activity involves hands-on learning with flying machines and should fit within ${time}.`;
       const assessmentPrompt = includeAssessment ? `Create a simple 3-question assessment based on the flying machines lesson plan.` : '';
@@ -114,7 +215,6 @@
         const lessonPlan = await fetchAIResponse(lessonPlanPrompt);
         const assessmentPlan = includeAssessment ? await fetchAIResponse(assessmentPrompt) : 'No assessment included.';
 
-        // Display AI-generated content
         document.getElementById('lesson-plan').textContent = lessonPlan;
         document.getElementById('assessment-plan').textContent = assessmentPlan;
         document.getElementById('output').style.display = 'block';
