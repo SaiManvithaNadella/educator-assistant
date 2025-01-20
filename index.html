@@ -61,6 +61,30 @@
   </div>
 
   <script>
+    async function fetchAIResponse(prompt) {
+      const apiKey = "sk-proj-EWjy3wtM8iHb3qZu-UXesy53RXTa3GlqxDCfkUzV4b3envHgVktf4r8UHZ8m7IDFUpiURKeoUMT3BlbkFJaNuUGf4AZo2xUY4g4YwbYFUTLegyP5y0DCI2opyaM8VVyGBzYxcnTgHUVYKz6klgRSVtd1hukAy"; // Replace with your OpenAI API key
+      const response = await fetch("https://api.openai.com/v1/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "text-davinci-003",
+          prompt: prompt,
+          max_tokens: 150,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch AI response");
+      }
+
+      const data = await response.json();
+      return data.choices[0].text.trim();
+    }
+
     document.getElementById('educator-form').addEventListener('submit', async function(e) {
       e.preventDefault();
 
@@ -81,23 +105,22 @@
       `;
       document.getElementById('responses').textContent = responses;
 
-      // AI Integration (simulated with static text here)
-      const lessonPlan = `Lesson Plan for ${grade}:
-      - Activity: Build a flying machine in a ${environment}.
-      - Duration: ${time}.
-      - Confidence Level: ${confidence}.`;
+      // AI Prompt for Lesson Plan
+      const lessonPlanPrompt = `Create a lesson plan for a ${grade} group in a ${environment} setting. 
+      The activity involves hands-on learning with flying machines and should fit within ${time}.`;
+      const assessmentPrompt = includeAssessment ? `Create a simple 3-question assessment based on the flying machines lesson plan.` : '';
 
-      const assessmentPlan = includeAssessment ? `
-        1. What is the purpose of the flying machine activity?
-        2. Describe the steps to build the flying machine.
-        3. How would you improve the flying machine design?
-      ` : 'No assessment included.';
+      try {
+        const lessonPlan = await fetchAIResponse(lessonPlanPrompt);
+        const assessmentPlan = includeAssessment ? await fetchAIResponse(assessmentPrompt) : 'No assessment included.';
 
-      document.getElementById('lesson-plan').textContent = lessonPlan;
-      document.getElementById('assessment-plan').textContent = assessmentPlan;
-
-      // Show output
-      document.getElementById('output').style.display = 'block';
+        // Display AI-generated content
+        document.getElementById('lesson-plan').textContent = lessonPlan;
+        document.getElementById('assessment-plan').textContent = assessmentPlan;
+        document.getElementById('output').style.display = 'block';
+      } catch (error) {
+        alert("Error generating content: " + error.message);
+      }
     });
   </script>
 </body>
