@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Educator Interview Assistant</title>
+  <title>Interactive Educator Interview Assistant</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
   <style>
@@ -11,7 +11,7 @@
       font-family: 'Poppins', sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f0f8ff;
+      background-color: #f8faff;
       color: #333;
     }
     .container {
@@ -34,7 +34,7 @@
     label {
       font-weight: 600;
     }
-    input[type="text"], textarea {
+    input[type="text"], textarea, select {
       padding: 10px;
       border: 1px solid #ddd;
       border-radius: 5px;
@@ -67,11 +67,28 @@
       border-radius: 10px;
       border: 1px solid #b3e0ff;
     }
+    .faq {
+      margin-top: 30px;
+    }
+    .faq h2 {
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .faq-content {
+      display: none;
+      padding: 10px 20px;
+      background: #f9f9f9;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    .visible {
+      display: block;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Educator Interview Assistant</h1>
+    <h1>Interactive Educator Interview Assistant</h1>
     <form id="educator-form">
       <label>How much time do you have for this activity? <small>(e.g., "30 minutes")</small></label>
       <input type="text" id="time" placeholder="Enter time in minutes" required>
@@ -82,18 +99,20 @@
       <label>What is the learning environment? <small>(e.g., "classroom, library, after-school")</small></label>
       <input type="text" id="environment" placeholder="Enter learning environment" required>
 
+      <label>What is your primary goal for this lesson?</label>
+      <select id="goal" required>
+        <option value="explore creativity">Explore Creativity</option>
+        <option value="improve collaboration">Improve Collaboration</option>
+        <option value="develop critical thinking">Develop Critical Thinking</option>
+        <option value="enhance problem-solving">Enhance Problem-Solving</option>
+      </select>
+
       <label>How confident are you in using hands-on projects?</label>
       <p id="confidence-value">Most Confident</p>
       <input type="range" id="confidence" min="1" max="5" value="5" step="1" oninput="updateConfidenceValue()">
 
       <label>Do you want to include an assessment? <small>(Yes/No)</small></label>
       <input type="text" id="assessment" placeholder="Enter 'Yes' or 'No'" required>
-
-      <label>Describe your wing design iterations (optional):</label>
-      <textarea id="wing-iterations" rows="3" placeholder="Briefly describe wing design improvements"></textarea>
-
-      <label>Reflective Questions (optional):</label>
-      <textarea id="reflective" rows="3" placeholder="Enter your reflections or questions"></textarea>
 
       <button type="submit">Generate Plan</button>
     </form>
@@ -102,6 +121,14 @@
       <h2>Results</h2>
       <div id="responses"></div>
       <button onclick="generatePDF()">Download PDF</button>
+    </div>
+
+    <div class="faq">
+      <h2 onclick="toggleFAQ()">📘 FAQs & Tips</h2>
+      <div class="faq-content">
+        <p><strong>Q: What if the machine doesn’t fly?</strong><br>A: Adjust the rubber band tension and use the tick-tock technique.</p>
+        <p><strong>Q: How can I adapt this for older learners?</strong><br>A: Encourage iterative testing with different wing shapes.</p>
+      </div>
     </div>
   </div>
 
@@ -114,52 +141,48 @@
     }
 
     async function fetchAIResponse(prompt) {
-  const apiUrl = "https://api-inference.huggingface.co/models/gpt2"; // Replace "gpt2" with your chosen model
-  const apiToken = "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"; // Replace with your actual API token
+      const apiKey = "your-openai-api-key"; // Replace with your actual API key
+      const response = await fetch("https://api.openai.com/v1/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "text-davinci-003",
+          prompt: prompt,
+          max_tokens: 200,
+          temperature: 0.7
+        })
+      });
 
-  const response = await fetch(apiUrl, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiToken}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      inputs: prompt,
-      options: {
-        wait_for_model: true // Ensures the model is loaded before processing
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`OpenAI API Error: ${error.error.message}`);
       }
-    })
-  });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(`Hugging Face API Error: ${error.error}`);
-  }
-
-  const data = await response.json();
-  return data[0].generated_text; // Access the generated text from the API response
-}
+      const data = await response.json();
+      return data.choices[0].text.trim();
+    }
 
     document.getElementById('educator-form').addEventListener('submit', async function (e) {
       e.preventDefault();
       const time = document.getElementById('time').value;
       const grade = document.getElementById('grade').value;
       const environment = document.getElementById('environment').value;
+      const goal = document.getElementById('goal').value;
       const confidence = document.getElementById('confidence-value').textContent;
       const assessment = document.getElementById('assessment').value.toLowerCase() === 'yes';
-      const iterations = document.getElementById('wing-iterations').value;
-      const reflections = document.getElementById('reflective').value;
 
-      const prompt = `Create a lesson plan for grade ${grade} in a ${environment} setting. Include these details: time = ${time}, confidence = ${confidence}, and assessment = ${assessment}. Include iterative wing design and reflective questions.`;
+      const prompt = `Create a lesson plan for grade ${grade} in a ${environment} setting. The goal is to ${goal}. Time: ${time}. Confidence level: ${confidence}. Include assessment: ${assessment}.`;
       try {
         const lessonPlan = await fetchAIResponse(prompt);
         const responsesHTML = `
           <p><strong>Time:</strong> ${time}</p>
           <p><strong>Grade:</strong> ${grade}</p>
           <p><strong>Environment:</strong> ${environment}</p>
+          <p><strong>Goal:</strong> ${goal}</p>
           <p><strong>Confidence:</strong> ${confidence}</p>
-          <p><strong>Wing Iterations:</strong> ${iterations || "Not provided"}</p>
-          <p><strong>Reflections:</strong> ${reflections || "Not provided"}</p>
           <p><strong>Lesson Plan:</strong> ${lessonPlan}</p>
         `;
         document.getElementById('responses').innerHTML = responsesHTML;
@@ -174,6 +197,11 @@
       const doc = new jsPDF();
       doc.text(document.getElementById('responses').innerText, 10, 10);
       doc.save('educator_results.pdf');
+    }
+
+    function toggleFAQ() {
+      const faqContent = document.querySelector('.faq-content');
+      faqContent.classList.toggle('visible');
     }
   </script>
 </body>
