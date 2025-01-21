@@ -25,7 +25,7 @@
       display: grid;
       grid-template-areas: 
         "header header"
-        "form results"
+        "form preview"
         "faq faq";
       grid-template-columns: 1fr 1fr;
       gap: 20px;
@@ -95,6 +95,25 @@
       display: none;
     }
 
+    .preview {
+      grid-area: preview;
+      background: #f4f8ff;
+      border-radius: 10px;
+      border: 2px solid #0077cc;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .preview h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .preview p {
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
     .faq {
       grid-area: faq;
       padding: 20px;
@@ -119,7 +138,7 @@
         grid-template-areas:
           "header"
           "form"
-          "results"
+          "preview"
           "faq";
         grid-template-columns: 1fr;
       }
@@ -161,6 +180,16 @@
       <button type="submit">Generate Plan</button>
     </form>
 
+    <div class="preview">
+      <h2>Preview</h2>
+      <p><strong>Time:</strong> <span id="preview-time">-</span></p>
+      <p><strong>Grade:</strong> <span id="preview-grade">-</span></p>
+      <p><strong>Environment:</strong> <span id="preview-environment">-</span></p>
+      <p><strong>Goal:</strong> <span id="preview-goal">-</span></p>
+      <p><strong>Confidence:</strong> <span id="preview-confidence">-</span></p>
+      <p><strong>Assessment:</strong> <span id="preview-assessment">-</span></p>
+    </div>
+
     <div id="output" class="results">
       <h2>Generated Lesson Plan</h2>
       <div id="responses"></div>
@@ -179,8 +208,19 @@
       const slider = document.getElementById('confidence');
       const valueDisplay = document.getElementById('confidence-value');
       const values = ["Very Less Confident", "Less Confident", "Neutral", "Confident", "Most Confident"];
-      valueDisplay.textContent = values[slider.value - 1];
+      const confidenceText = values[slider.value - 1];
+      valueDisplay.textContent = confidenceText;
+
+      document.getElementById('preview-confidence').textContent = confidenceText;
     }
+
+    document.getElementById('educator-form').addEventListener('input', function () {
+      document.getElementById('preview-time').textContent = document.getElementById('time').value || '-';
+      document.getElementById('preview-grade').textContent = document.getElementById('grade').value || '-';
+      document.getElementById('preview-environment').textContent = document.getElementById('environment').value || '-';
+      document.getElementById('preview-goal').textContent = document.getElementById('goal').value || '-';
+      document.getElementById('preview-assessment').textContent = document.getElementById('assessment').value || '-';
+    });
 
     async function fetchAIResponse(prompt) {
       const apiKey = "your-openai-api-key"; // Replace with your OpenAI API key
